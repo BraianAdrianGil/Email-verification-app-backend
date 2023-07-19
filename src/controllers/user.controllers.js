@@ -138,7 +138,7 @@ const resetPassword = catchError(async (req, res) => {
   const user = await User.findByPk(emailCode.userId);
   await user.update(
     { password: encriptedPassword },
-    { where: { id: emailCode.userId }, returning: true }
+    { where: { id: user.id }, returning: true }
   );
   await emailCode.destroy();
   return res.json(user);
