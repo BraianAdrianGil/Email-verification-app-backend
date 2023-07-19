@@ -105,6 +105,42 @@ const getLoggedUser = catchError(async (req, res) => {
   //return res.json(req.user) asi sirve también!
 });
 
+const resetPasswordEmail = catchError(async (req, res) => {
+  const { email, frontBaseUrl } = req.body;
+  const user = await User.findOne({ where: { email } });
+
+  if (!user) return res.status(401).json({ message: "Invalid email" });
+
+  const code = require("crypto").randomBytes(64).toString("hex");
+  const link = `${frontBaseUrl}/auth/reset_password/${code}`;
+
+  await EmailCode.create({
+    code: code,
+    userId: user.id,
+  });
+
+  await sendEmail({
+    to: email,
+    subject: "Reset password",
+    html: ` <h1>Reset password for user app</h1>
+            <p>You have requested a password reset for your user in our application. <br />Please click the link below to create a new password</p>
+            <br />
+            <a href="${link}">${link}</a>`,
+  });
+});
+
+const resetPassword = catchError(async (req, res) => {
+  const { password } = req.body;
+  const code = req.params;
+  const encriptedPassword = await bcrypt.hash(password, 10);
+  const emailCode = await EmailCode.findOne({ where: { code } });
+  if (!emailCode) return res.status(401).json({ message: "Invalid code" });
+  const user = await User.findByPk(emailCode.userId);
+  await user.update({ password: encriptedPassword });
+  console.log(user);
+  return res.json();
+});
+
 module.exports = {
   getAll,
   create,
@@ -114,4 +150,6 @@ module.exports = {
   verifyCode,
   login,
   getLoggedUser,
+  resetPasswordEmail,
+  resetPassword,
 };
