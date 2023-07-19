@@ -31,6 +31,6 @@ userRouter
 
 userRouter.route("/verify/:code").get(verifyCode);
 
-userRouter.route("/auth/reset_password/:code").put(resetPassword);
+userRouter.route("/auth/reset_password/:code").post(resetPassword);
 
 module.exports = userRouter;
