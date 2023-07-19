@@ -136,9 +136,12 @@ const resetPassword = catchError(async (req, res) => {
   const emailCode = await EmailCode.findOne({ where: { code } });
   if (!emailCode) return res.status(401).json({ message: "Invalid code" });
   const user = await User.findByPk(emailCode.userId);
-  await user.update({ password: encriptedPassword });
-  console.log(user);
-  return res.json();
+  await user.update(
+    { password: encriptedPassword },
+    { where: { id: emailCode.userId }, returning: true }
+  );
+  await emailCode.destroy();
+  return res.json(user);
 });
 
 module.exports = {
