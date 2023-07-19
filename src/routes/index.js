@@ -5,6 +5,5 @@ const router = express.Router();
 
 // colocar las rutas aquí
 router.use("/users", userRouter);
-router.use("/emailCodes", emailRouter);
 
 module.exports = router;
